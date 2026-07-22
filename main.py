@@ -2,10 +2,11 @@
 # 1. 모듈 가져오기
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles #정적 데이터 처리 모듈
 
 # 2. Fastapi객체 생성, 전역 변수 생성
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="templates") #정적 데이터 경로 설정
 
 # 3. 라우팅 구성/정의
 @app.get("/")
