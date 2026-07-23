@@ -1,0 +1,61 @@
+services:
+  db:
+    image: mysql
+    container_name: mysql_db
+    restart: always
+
+    environment:
+      MYSQL_ROOT_PASSWORD: "1234"
+      MYSQL_DATABASE: memo
+      MYSQL_USER: guest
+      MYSQL_PASSWORD: "1234"
+
+    volumes:
+      - mysql-vol:/var/lib/mysql
+
+    ports:
+      - "3307:3306"
+
+    networks:
+      - my-net
+  #fastapi 기반으로 작성된 백엔드 코드, was 담당
+  app:
+    build: ./app #app 디렉토리 내에 존재하는 dockerfile을 기반으로 build>이미지 생성>컨테이너 구성
+    container_name: fastapi_app
+    restart: unless-stopped
+    # Dockerfile의 CMD or ENTRYPOINT + CMD -> 데몬 띄우기와 동일한 의미
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    # 볼륨: 바인드 마운트 [host os경로]:[컨테이너 작업디렉토리 경로]
+    volumes:
+      - ./app:/app
+    # 환경변수: app -> db로 엑세스 -> SQL실행 -> 결과획들하기 위해 연결정보 필요
+    environment:
+      # SQLAlchemy + 전용 드라이버 브릿지 하여 사용시 표기법
+      #프로토콜명://아이디:비번@ip(서비스명):port/데이터베이스명
+      DATABASE_URL: "mysql+pymysql://"
+    networks:
+      - my-net
+    # 의존성 명시: 특정 컨테이너가 먼저 정상 가동중이여야만 해당 컨테이너가 작동된다
+    depends_on:
+      # 현재코드는 관계없음. main.py가 db 사용을 하지 않음. 현재는 참고용
+      - db
+  proxy:
+    image: nginx:alpine
+    container_name: nginx_proxy
+    restart: unless-stopped
+    # 프록시 할 포트
+    ports:
+      - "80:80"
+    # 볼륨 (프록시 구성에 필요한 설정 파일을 외부(호스트os)로 공유)
+    volumes:
+      - ./nginx/web.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - my-net
+    depends_on:      
+      - app
+networks:
+  my-net:
+    driver: bridge
+
+volumes:
+  mysql-vol:
