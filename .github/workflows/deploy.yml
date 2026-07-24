@@ -58,7 +58,7 @@ jobs:
           username: ${{ secrets.USER_NAME }}
           key: ${{ secrets.EC2_KEY }}
           port: 22
-          source: ./docker-compose.yml
+          source: docker-compose.yaml
           target: "/home/ubuntu"
 
       - name: Run Script And Service Restart
@@ -77,5 +77,10 @@ jobs:
             docker-compose up -d
             # 이미지가 최신으로 교체되면 기존 것 가비지가 되어 공간만 차지함
             docker image prune -f
+      - name: 배포 파일 확인
+        run: |
+          pwd
+          ls -al
+          test -f docker-compose.yaml
 
       
