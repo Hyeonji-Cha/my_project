@@ -22,7 +22,7 @@ services:
   app:
     # 로컬 build에서 도커 허브에서 내려받는 방식으로 변경
     # image: ${{DOCKER_USERNAME}}/fastapi-app:1.0
-    image: chacha98/fastapi-app:1.0
+    image: chacha98/fastapi-app:1.1
     container_name: fastapi_app
     restart: unless-stopped
     # Dockerfile의 CMD or ENTRYPOINT + CMD -> 데몬 띄우기와 동일한 의미
